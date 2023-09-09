@@ -60,13 +60,13 @@ class DataBase:
         results = []
         methods = []
         for malfunction in self.malfunctions:
-            accuracy = jellyfish.jaro_distance(text, malfunction[1])
+            accuracy = jellyfish.damerau_levenshtein_distance(text, malfunction[1])
             results.append({'id': malfunction[0], 'malfunction': malfunction[1], 'accuracy': accuracy,
                             'action_id': malfunction[2]})
 
         sort_array = sorted(results, key=itemgetter('accuracy'))
         # print(sort_array[-1])
-        some_id = sort_array[-1]['id']
+        some_id = sort_array[0]['id']
         select_reasons = "SELECT * FROM reasons WHERE malfunction_id = %s;"
         reasons = self.execute_read_query_params(self.connection, select_reasons, [some_id])
         # print('Причины:')
@@ -86,6 +86,23 @@ class DataBase:
 
 
 if __name__ == "__main__":
-    a = DataBase()
-    print(a.find_relevant_info("Рейки топливных насосов не выдвигаются на подачу топлива или выходят медленно"))
-    print(a.find_relevant_info("Рейки топливных насосов не  на подачу топлива или выходят "))
+    # a = DataBase()
+    # print(a.find_relevant_info("Рейки топливных насосов не выдвигаются на подачу топлива или выходят медленно"))
+    # print(a.find_relevant_info("Рейки топливных насосов не  на подачу топлива или выходят "))
+    text1 = 'При нажатии кнопки "Пуск дизеля" контактор КМН включается, но маслопрокачивающий насос не работает'
+    text2 = 'При нажатии кнопки "Пуск дизеля" маслопрокачивающий насос не работает'
+    text3 = 'при нажатиикнопка пуск дизеля контакторкмн включается маслопрокачивающий насос не работает'
+
+    text4 = 'не включилось ру6'
+    text5 = 'рушесть не работает'
+    text6 = 'ктн не включаются'
+
+    text7 = "при повышении температуры воды и масла частота вращения вала вентилятора холодильника увеличивается, жалюзи не открываются."
+
+    print(jellyfish.levenshtein_distance(text1, text2))
+    print(jellyfish.levenshtein_distance(text1, text3))
+    print(jellyfish.levenshtein_distance(text1, text7))
+    print("damerau_levenshtein_distance")
+    print(jellyfish.levenshtein_distance(text4, text5))
+    print(jellyfish.levenshtein_distance(text4, text6))
+    print(jellyfish.levenshtein_distance(text4, text7))

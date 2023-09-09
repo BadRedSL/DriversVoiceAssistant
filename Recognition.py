@@ -1,8 +1,6 @@
 import pyaudio
 import wave
 import nemo.collections.asr as nemo_asr
-import language_tool_python
-import torch
 
 
 class Recognition:
@@ -16,12 +14,6 @@ class Recognition:
         self.__AUDIO_PATH = f"./{self.__OUTPUT_FILENAME}"
 
         self.__sber_quartzNet = nemo_asr.models.EncDecCTCModel.restore_from("./ZMv")
-        self.__nemo_quartzNet = nemo_asr.models.ASRModel.from_pretrained(model_name="QuartzNet15x5Base-En")
-
-        self.__correction_tool_ru = language_tool_python.LanguageTool('ru-RU')
-
-        _, _, _, _, self.__apply_te = torch.hub.load(repo_or_dir='snakers4/silero-models',
-                                                     model='silero_te')
 
     def record(self, is_recording: list[bool,]):
         p = pyaudio.PyAudio()
@@ -55,10 +47,7 @@ class Recognition:
 
     def __recognize(self, language: str) -> str:
         files = [self.__AUDIO_PATH]
-        if language == "ru":
-            transcripts = self.__sber_quartzNet.transcribe(paths2audio_files=files)
-        else:
-            transcripts = self.__nemo_quartzNet.transcribe(paths2audio_files=files)
+        transcripts = self.__sber_quartzNet.transcribe(paths2audio_files=files)
         print("* done transcribing")
         return transcripts[0]
 

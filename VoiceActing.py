@@ -1,5 +1,4 @@
 import pyttsx3
-import threading
 
 
 class VoiceActing:
