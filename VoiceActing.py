@@ -16,4 +16,4 @@ class VoiceActing:
 
     def talk(self, text: str):
         self.__tts.say(text)
-        # self.__tts.runAndWait()
+        self.__tts.runAndWait()

@@ -12,7 +12,7 @@ class Application:
     def __init__(self):
         self.__language = "ru"
 
-        self.__window_height = 250
+        self.__window_height = 350
         self.__window_width = 400
         self.__frame_txt_height = 300
         self.__frame_btn_height = self.__window_height - self.__frame_txt_height
@@ -44,6 +44,16 @@ class Application:
         self.__btn_stop_record.pack(anchor="center", fill="x", expand=True, side="bottom", before=self.__btn_record,
                                     padx=5)
 
+        self.__btn_delete = Button(master=self.__frame_btn, text="Очистка", command=self.__clicked_btn_delete,
+                                   height=self.__btn_height)
+        self.__btn_delete.pack(anchor="center", fill="x", expand=True, side="bottom", before=self.__btn_record,
+                               padx=5)
+
+        self.__btn_run = Button(master=self.__frame_btn, text="Ввод текста", command=self.__clicked_btn_run,
+                                height=self.__btn_height)
+        self.__btn_run.pack(anchor="center", fill="x", expand=True, side="bottom", before=self.__btn_record,
+                            padx=5)
+
         self.__recognition = Recognition()
         self.__voice_actor = VoiceActing()
         self.__database = DataBase()
@@ -52,6 +62,7 @@ class Application:
     def __clicked_btn_record(self):
         self.__txt.delete(0.0, "end")
         self.__btn_record.config(state='disabled')
+        self.__btn_run.config(state='disabled')
         self.__btn_stop_record.config(state='normal')
         global is_recording
         is_recording[0] = True
@@ -62,6 +73,7 @@ class Application:
         self.__txt.delete(0.0, "end")
         self.__btn_stop_record.config(state='disabled')
         self.__btn_record.config(state='normal')
+        self.__btn_run.config(state='normal')
         global is_recording
         is_recording[0] = False
         self.__thread.join()
@@ -69,8 +81,27 @@ class Application:
         print(f"транскрибированный текст: {text}")
         relevant_text = self.get_relevant_text(text)
         print(relevant_text)
-        self.__txt.insert(0.0, relevant_text)
-        self.voice_acting(relevant_text)
+        t1 = threading.Thread(target=self.__txt.insert, args=(0.0, relevant_text,))
+        t2 = threading.Thread(target=self.voice_acting, args=(relevant_text,))
+
+        t1.start()
+        t2.start()
+
+        # self.voice_acting(relevant_text)
+
+    def __clicked_btn_run(self):
+        text = self.__txt.get(0.0, "end")
+        self.__txt.delete(0.0, "end")
+        relevant_text = self.get_relevant_text(text)
+        print(relevant_text)
+        t1 = threading.Thread(target=self.__txt.insert, args=(0.0, relevant_text,))
+        t2 = threading.Thread(target=self.voice_acting, args=(relevant_text,))
+
+        t1.start()
+        t2.start()
+
+    def __clicked_btn_delete(self):
+        self.__txt.delete(0.0, "end")
 
     def convert_speech_to_text(self) -> str:
         text = self.__recognition.recognize_speech(self.__language)

@@ -15,7 +15,7 @@ class Recognition:
 
         self.__sber_quartzNet = nemo_asr.models.EncDecCTCModel.restore_from("./ZMv")
 
-    def record(self, is_recording: list[bool,]):
+    def record(self, is_recording):
         p = pyaudio.PyAudio()
 
         stream = p.open(format=self.__FORMAT,

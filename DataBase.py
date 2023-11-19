@@ -2,7 +2,6 @@ import psycopg2
 from operator import itemgetter
 import jellyfish
 
-
 class DataBase:
 
     def __init__(self):
@@ -60,26 +59,31 @@ class DataBase:
         results = []
         methods = []
         for malfunction in self.malfunctions:
-            accuracy = jellyfish.damerau_levenshtein_distance(text, malfunction[1])
+            accuracy = jellyfish.jaro_similarity(text, malfunction[1])
             results.append({'id': malfunction[0], 'malfunction': malfunction[1], 'accuracy': accuracy,
                             'action_id': malfunction[2]})
 
         sort_array = sorted(results, key=itemgetter('accuracy'))
         # print(sort_array[-1])
-        some_id = sort_array[0]['id']
+        some_id = sort_array[-1]['id']
         select_reasons = "SELECT * FROM reasons WHERE malfunction_id = %s;"
         reasons = self.execute_read_query_params(self.connection, select_reasons, [some_id])
         # print('Причины:')
         # print(reasons)
+        
         for reason in reasons:
             reason_id = reason[0]
             select_methods = "SELECT * FROM methods WHERE reason_id = %s;"
             method = self.execute_read_query_params(self.connection, select_methods, [reason_id])
             methods.append(method)
+
             # print('Метод:')
             # print(method)
+
         reasons_and_methods = '\n'.join(
             [f'{r + 1}) {reasons[r][1]} ({methods[r][0][1]})' for r in range(len(reasons))])
+        
+
         result_text = f"Неисправность:\n\n{sort_array[-1]['malfunction']}\n\nВероятные причины / Способы устранения:\n\n" \
                       f"{reasons_and_methods}"
         return result_text
